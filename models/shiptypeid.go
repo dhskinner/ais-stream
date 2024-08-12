@@ -1,6 +1,6 @@
 package models
 
-type ShipTypeId int32
+type ShipTypeId uint8
 
 const (
 	ShipTypeUnknown              ShipTypeId = 0
@@ -242,11 +242,14 @@ var shipTypeLabel []string = []string{
 	"Other Type, no additional information",
 }
 
-var SpecialCraft = []ShipTypeId{
-	ShipTypeTowing,
-	ShipTypeTowingLong,
-	ShipTypeDredging,
-	ShipTypeDiving,
+// The following general categories of vessel are
+// considered 'of interest' for the AIS dashboard
+// TODO move this list to the database as a config
+var CraftOfInterest = []ShipTypeId{
+	// ShipTypeTowing,
+	// ShipTypeTowingLong,
+	// ShipTypeDredging,
+	// ShipTypeDiving,
 	ShipTypeMilitary,
 	ShipTypeHighSpeedCraft,
 	ShipTypeHighSpeedCraftA,
@@ -254,11 +257,11 @@ var SpecialCraft = []ShipTypeId{
 	ShipTypeHighSpeedCraftC,
 	ShipTypeHighSpeedCraftD,
 	ShipTypeHighSpeedCraftNoInfo,
-	ShipTypePilot,
+	// ShipTypePilot,
 	ShipTypeSAR,
 	// ShipTypeTug,
 	// ShipTypePortTender,
-	ShipTypeAntiPollution,
+	// ShipTypeAntiPollution,
 	ShipTypeLawEnforcement,
-	ShipTypeMedicalTransport,
+	// ShipTypeMedicalTransport,
 }

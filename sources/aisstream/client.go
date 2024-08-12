@@ -42,7 +42,7 @@ func Client(ctx context.Context, wg *sync.WaitGroup, config *sources.Config, hd 
 	// the following must be present
 	retry, err := config.GetRetry()
 	if err != nil {
-		slog.Error("aissstream: error", "error", err)
+		slog.Error("aissstream: error", "name", config.Name, "error", err)
 		return
 	}
 
@@ -53,13 +53,13 @@ func Client(ctx context.Context, wg *sync.WaitGroup, config *sources.Config, hd 
 		// run a new worker
 		err := c.run()
 		if err != nil {
-			slog.Error("aissstream: error", "error", err)
+			slog.Error("aissstream: error", "name", c.config.Name, "error", err)
 		}
 
 		// on error (and if not cancelled), automatically restart
 		select {
 		case <-ctx.Done():
-			slog.Info("aisstream: stopped worker")
+			slog.Info("aisstream: stopped worker", "name", c.config.Name)
 			return
 		default:
 			time.Sleep(time.Duration(retry) * time.Second)
@@ -87,15 +87,15 @@ func (c *aisClient) run() error {
 	// connect to the webstream
 	ws, _, err := websocket.DefaultDialer.Dial(address, nil)
 	if err != nil {
-		slog.Info("aisstream: dial failed", "address", address)
+		slog.Info("aisstream: dial failed", "name", c.config.Name, "address", address)
 		return err
 	}
-	slog.Info("aisstream: connected", "address", address)
+	slog.Info("aisstream: connected", "name", c.config.Name, "address", address)
 
 	// defer a function for orderly shutdown
 	defer func() {
 		ws.Close()
-		slog.Info("aisstream: closed webstream")
+		slog.Info("aisstream: closed webstream", "name", c.config.Name)
 	}()
 
 	subMsg := aisStream.SubscriptionMessage{
@@ -106,14 +106,14 @@ func (c *aisClient) run() error {
 
 	subMsgBytes, _ := json.Marshal(subMsg)
 	if err := ws.WriteMessage(websocket.TextMessage, subMsgBytes); err != nil {
-		slog.Info("aisstream: subscription failed", "error", err)
+		slog.Info("aisstream: subscription failed", "name", c.config.Name, "error", err)
 		return err
 	}
 
 	// create a new encoder to transform aisstream back to nmea sentences
 	encoder := encode.NewEncoder()
 
-	slog.Info("aisstream: starting worker")
+	slog.Info("aisstream: starting worker", "name", c.config.Name)
 
 worker:
 	for {
@@ -220,6 +220,6 @@ worker:
 		}
 	}
 
-	slog.Info("aisstream: stopping worker")
+	slog.Info("aisstream: stopping worker", "name", c.config.Name)
 	return nil
 }

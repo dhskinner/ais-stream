@@ -162,11 +162,11 @@ func newClient(connectionString string) (*mongo.Client, error) {
 
 	// Send a ping to confirm a successful connection
 	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Err(); err != nil {
-		slog.Error("error could not ping mongodb server", "connection", connectionString, "error", err)
+		slog.Error("error could not ping mongodb atlas", "error", err)
 		return nil, err
 	}
 
-	slog.Info("successfully connected to mongodb", "connection", connectionString)
+	slog.Info("successfully connected to mongodb atlas")
 	return client, nil
 
 }

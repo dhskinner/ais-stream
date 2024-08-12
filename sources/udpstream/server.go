@@ -39,13 +39,13 @@ func Server(
 		// run a new worker
 		err := c.run()
 		if err != nil {
-			slog.Error("udpstream: error", "error", err)
+			slog.Error("udpstream: error", "name", config.Name, "error", err)
 		}
 
 		// on error (and if not cancelled), automatically restart
 		select {
 		case <-ctx.Done():
-			slog.Info("udpstream: stopped worker")
+			slog.Info("udpstream: stopped worker", "name", config.Name)
 			return
 		default:
 			time.Sleep(time.Duration(retry) * time.Second)
@@ -76,25 +76,25 @@ func (c *udpServer) run() error {
 	// check the given uri/address is valid
 	addr, err := net.ResolveUDPAddr(c.config.Protocol, address)
 	if err != nil {
-		slog.Info("udpstream: failed to resolve address", "address", address)
+		slog.Info("udpstream: failed to resolve address", "name", c.config.Name, "address", address)
 		return err
 	}
 
 	// connect!
 	conn, err := net.ListenUDP(c.config.Protocol, addr)
 	if err != nil {
-		slog.Info("udpstream: dial failed", "address", address)
+		slog.Info("udpstream: dial failed", "name", c.config.Name, "address", address)
 		return err
 	}
-	slog.Info("udpstream: connected", "address", address)
+	slog.Info("udpstream: connected", "name", c.config.Name, "address", address)
 
 	// defer a function for orderly shutdown
 	defer func() {
 		conn.Close()
-		slog.Info("udpstream: disconnected", "address", address)
+		slog.Info("udpstream: disconnected", "name", c.config.Name, "address", address)
 	}()
 
-	slog.Info("udpstream: starting worker")
+	slog.Info("udpstream: starting worker", "name", c.config.Name)
 
 worker:
 	for {
@@ -105,13 +105,13 @@ worker:
 
 		// check for timeouts
 		if err, ok := err.(net.Error); ok && err.Timeout() {
-			slog.Info("udpstream: timeout receiving messages")
+			slog.Info("udpstream: timeout receiving messages", "name", c.config.Name)
 			return err
 		}
 
 		// check for other errors
 		if err != nil {
-			slog.Info("udpstream: error receiving messages")
+			slog.Info("udpstream: error receiving messages", "name", c.config.Name)
 			return err
 		}
 
@@ -128,6 +128,6 @@ worker:
 		}
 	}
 
-	slog.Info("udpstream: stopping worker")
+	slog.Info("udpstream: stopping worker", "name", c.config.Name)
 	return nil
 }

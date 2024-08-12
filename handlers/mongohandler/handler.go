@@ -70,7 +70,7 @@ func (p *MongoHandler) Connect(filterName string) error {
 	var err error = nil
 	p.client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		slog.Error("error connecting to mongodb", "uri", uri, "error", err)
+		slog.Error("error connecting to mongodb", "error", err)
 		return err
 	}
 	p.isConnected = true

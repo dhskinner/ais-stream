@@ -39,13 +39,13 @@ func Client(
 		// run a new worker
 		err := c.run()
 		if err != nil {
-			slog.Error("tcpstream: error", "error", err)
+			slog.Error("tcpstream: error", "name", config.Name, "error", err)
 		}
 
 		// on error (and if not cancelled), automatically restart
 		select {
 		case <-ctx.Done():
-			slog.Info("tcpstream: stopped worker")
+			slog.Info("tcpstream: stopped worker","name", config.Name )
 			return
 		default:
 			time.Sleep(time.Duration(retry) * time.Second)
@@ -76,25 +76,25 @@ func (c *tcpClient) run() error {
 	// check the given uri/address is valid
 	addr, err := net.ResolveTCPAddr(c.config.Protocol, address)
 	if err != nil {
-		slog.Info("tcpstream: failed to resolve address", "address", address)
+		slog.Info("tcpstream: failed to resolve address","name", c.config.Name, "address", address)
 		return err
 	}
 
 	// connect!
 	conn, err := net.DialTCP(c.config.Protocol, nil, addr)
 	if err != nil {
-		slog.Info("tcpstream: dial failed", "address", address)
+		slog.Info("tcpstream: dial failed", "name", c.config.Name, "address", address)
 		return err
 	}
-	slog.Info("tcpstream: connected", "uri", address)
+	slog.Info("tcpstream: connected", "name", c.config.Name, "address", address)
 
 	// defer a function for orderly shutdown
 	defer func() {
 		conn.Close()
-		slog.Info("tcpstream: disconnected", "address", address)
+		slog.Info("tcpstream: disconnected", "name", c.config.Name,  "address", address)
 	}()
 
-	slog.Info("tcpstream: starting worker")
+	slog.Info("tcpstream: starting worker", "name", c.config.Name)
 
 worker:
 	for {
@@ -105,13 +105,13 @@ worker:
 
 		// check for timeouts
 		if err, ok := err.(net.Error); ok && err.Timeout() {
-			slog.Info("tcpstream: timeout receiving messages")
+			slog.Info("tcpstream: timeout receiving messages", "name", c.config.Name, )
 			return err
 		}
 
 		// check for other errors
 		if err != nil {
-			slog.Info("tcpstream: error receiving messages")
+			slog.Info("tcpstream: error receiving messages", "name", c.config.Name, )
 			return err
 		}
 
@@ -128,6 +128,6 @@ worker:
 		}
 	}
 
-	slog.Info("tcpstream: stopping worker")
+	slog.Info("tcpstream: stopping worker", "name", c.config.Name)
 	return nil
 }

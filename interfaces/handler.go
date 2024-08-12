@@ -1,0 +1,16 @@
+package interfaces
+
+import (
+	"ais-stream/models"
+)
+
+type Handler interface {
+	Message(message models.Message) error
+	GetRecord(mmsi models.MMSI) (*Record, error)
+}
+
+type Record struct {
+	Mmsi     models.MMSI        `bson:"mmsi"`
+	ShipType models.ShipTypeId  `bson:"shiptype"`
+	Position models.Coordinates `bson:"pos"`
+}

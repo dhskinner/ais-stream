@@ -16,18 +16,18 @@ type AtlasVessel struct {
 	ETA              time.Time   `bson:"eta,omitempty"`
 	ImoNumber        uint32      `bson:"imo,omitempty"`
 	Length           Metres      `bson:"length,omitempty"`
+	Metadata         *Metadata   `bson:"metadata,omitempty"`
 	Mmsi             MMSI        `bson:"mmsi"`
 	Name             string      `bson:"name,omitempty"`
 	Navigation       string      `bson:"nav,omitempty"`
 	Position         Coordinates `bson:"pos,omitempty"`
+	ShipType         ShipType    `bson:"shiptype,omitempty"`
 	SpeedOverGround  Knots       `bson:"sog,omitempty"`
 	Source           string      `bson:"source,omitempty"`
 	State            string      `bson:"state,omitempty"`
-	Time             time.Time   `bson:"time"`
-	ShipType         ShipType    `bson:"shiptype,omitempty"`
-	Vendor           *Vendor     `bson:"vendor,omitempty"`
 	Style            *Style      `bson:"style,omitempty"`
-	Metadata         *Metadata   `bson:"metadata,omitempty"`
+	Time             time.Time   `bson:"time"`
+	Vendor           *Vendor     `bson:"vendor,omitempty"`
 }
 
 func NewAtlasVessel(in *VesselInfo) *AtlasVessel {

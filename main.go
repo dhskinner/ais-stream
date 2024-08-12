@@ -20,8 +20,8 @@ import (
 
 const (
 	WORKER_CLOSE_TIMEOUT time.Duration = 5 * time.Second
-	RUN_AISSTREAM        bool          = false // <- normally true
-	RUN_WALNUT_TCP       bool          = false // <- normally true
+	RUN_AISSTREAM        bool          = true // <- normally true
+	RUN_WALNUT_TCP       bool          = true // <- normally true
 	RUN_WALNUT_UDP       bool          = false
 	RUN_AMSA             bool          = true // <- normally true
 	RUN_AISHUB           bool          = false
@@ -109,7 +109,7 @@ func main() {
 				AddressKey:     "AMSA_URI",
 				TimeoutSecsKey: "AMSA_TIMEOUT_SECS",
 				RetrySecsKey:   "AMSA_RETRY_SECS",
-				Verbose:        true,
+				Verbose:        false,
 			},
 			interfaces.Handler(mongoWorker),
 		)

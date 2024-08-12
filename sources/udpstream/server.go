@@ -70,7 +70,7 @@ func (c *udpServer) run() error {
 	buffer := make([]byte, 4096)
 
 	// create a parser to extract complete sentences
-	parser := sources.NewParser(c.handler, c.config.Name)
+	parser := sources.NewParser(c.handler, c.config.Name, c.config.Verbose)
 	go parser.Process(c.ctx)
 
 	// check the given uri/address is valid

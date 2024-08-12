@@ -13,6 +13,10 @@ import (
 	"github.com/BertoldVdb/go-ais/aisnmea"
 )
 
+const (
+	PARSER_STATS_INTERVAL time.Duration = 1 * time.Minute
+)
+
 type State int
 
 const (
@@ -36,10 +40,12 @@ type Parser struct {
 	codec        *aisnmea.NMEACodec
 	messageCount uint64
 	errorCount   uint64
+	lastCount    uint64
+	lastStats    time.Time
 	verbose      bool
 }
 
-func NewParser(hd interfaces.Handler, name string) *Parser {
+func NewParser(hd interfaces.Handler, name string, verbose bool) *Parser {
 
 	p := &Parser{
 		name:         name,
@@ -51,6 +57,9 @@ func NewParser(hd interfaces.Handler, name string) *Parser {
 		codec:        aisnmea.NMEACodecNew(ais.CodecNew(false, false)),
 		messageCount: 0,
 		errorCount:   0,
+		lastCount:    0,
+		lastStats:    time.Now(),
+		verbose:      verbose,
 	}
 
 	return p
@@ -59,6 +68,16 @@ func NewParser(hd interfaces.Handler, name string) *Parser {
 // flag to set verbose mode
 func (p *Parser) SetVerbose(verbose bool) {
 	p.verbose = verbose
+}
+
+// print some statistics
+func (p *Parser) PrintStats() {
+	count := p.messageCount - p.lastCount
+	durn := time.Since(p.lastStats)
+	freq := fmt.Sprintf("%.1f", float32(count)/float32(durn.Seconds()))
+	p.lastCount = p.messageCount
+	p.lastStats = time.Now()
+	slog.Info("parser", "name", p.name, "messages", p.messageCount, "rate/sec", freq)
 }
 
 // Accepts and copies bytes from an input source into a buffer for processing
@@ -83,6 +102,9 @@ func (p *Parser) Process(ctx context.Context) {
 
 	p.reset()
 
+	ticker := time.NewTicker(PARSER_STATS_INTERVAL)
+	defer ticker.Stop()
+
 worker:
 	for {
 
@@ -91,6 +113,10 @@ worker:
 		// check for cancel signal
 		case <-ctx.Done():
 			break worker
+
+		// print some stats
+		case <-ticker.C:
+			p.PrintStats()
 
 		// receive incoming bytes
 		case c := <-p.source:
@@ -251,7 +277,7 @@ func (p *Parser) decode(sentence *models.Sentence) error {
 	} else if message != nil {
 
 		if p.verbose {
-			slog.Debug("parser", "name", p.name, "tags", message.TagBlock)
+			slog.Info("parser", "name", p.name, "tags", message.TagBlock)
 		}
 		p.handler.Message(models.Message(message))
 

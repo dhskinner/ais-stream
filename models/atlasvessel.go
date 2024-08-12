@@ -5,27 +5,29 @@ import (
 )
 
 type AtlasVessel struct {
-	Time             time.Time      `bson:"time"`
-	Mmsi             MMSI           `bson:"mmsi"`
-	Name             string         `bson:"name"`
-	CallSign         string         `bson:"callsign"`
-	ImoNumber        uint32         `bson:"imo"`
-	Metadata         *AtlasMetadata `bson:"metadata"`
-	ShipType         ShipTypeInfo   `bson:"shiptype"`
-	Dimension        Dimension      `bson:"dimension,truncate"`
-	Length           Metres         `bson:"length,truncate"`
-	Beam             Metres         `bson:"beam,truncate"`
-	Draught          Metres         `bson:"draught,truncate"`
-	AisClass         string         `bson:"aisclass"`
-	Position         Coordinates    `bson:"pos"`
-	SpeedOverGround  Knots          `bson:"sog,truncate"`
-	CourseOverGround Degrees        `bson:"cog,truncate"`
-	Source           string         `bson:"source"`
-	State            string         `bson:"state"`
-	NavigationStatus string         `bson:"nav"`
-	Destination      string         `bson:"dest"`
-	ETA              time.Time      `bson:"eta"`
-	//Vendor           VendorInfo    `bson:"vendor"`
+	Beam             Metres      `bson:"beam,omitempty"`
+	CallSign         string      `bson:"callsign,omitempty"`
+	AisClass         string      `bson:"class,omitempty"`
+	Altitude         Metres      `bson:"alt,omitempty"`
+	CourseOverGround Degrees     `bson:"cog,omitempty,truncate"`
+	Dimension        *Dimension  `bson:"dimension,omitempty,truncate"`
+	Destination      string      `bson:"dest,omitempty"`
+	Draught          Metres      `bson:"draught,omitempty"`
+	ETA              time.Time   `bson:"eta,omitempty"`
+	ImoNumber        uint32      `bson:"imo,omitempty"`
+	Length           Metres      `bson:"length,omitempty"`
+	Mmsi             MMSI        `bson:"mmsi"`
+	Name             string      `bson:"name,omitempty"`
+	Navigation       string      `bson:"nav,omitempty"`
+	Position         Coordinates `bson:"pos,omitempty"`
+	SpeedOverGround  Knots       `bson:"sog,omitempty"`
+	Source           string      `bson:"source,omitempty"`
+	State            string      `bson:"state,omitempty"`
+	Time             time.Time   `bson:"time"`
+	ShipType         ShipType    `bson:"shiptype,omitempty"`
+	Vendor           *Vendor     `bson:"vendor,omitempty"`
+	Style            *Style      `bson:"style,omitempty"`
+	Metadata         *Metadata   `bson:"metadata,omitempty"`
 }
 
 func NewAtlasVessel(in *VesselInfo) *AtlasVessel {
@@ -36,7 +38,7 @@ func NewAtlasVessel(in *VesselInfo) *AtlasVessel {
 		Name:             in.Name,
 		CallSign:         in.CallSign,
 		ImoNumber:        in.ImoNumber,
-		ShipType:         ShipTypeInfo(in.ShipType),
+		ShipType:         ShipType(in.ShipTypeId),
 		Dimension:        in.Dimension,
 		Length:           in.Dimension.Length(),
 		Beam:             in.Dimension.Beam(),
@@ -47,10 +49,15 @@ func NewAtlasVessel(in *VesselInfo) *AtlasVessel {
 		CourseOverGround: in.CourseOverGround,
 		Source:           in.Source,
 		State:            in.State,
-		NavigationStatus: in.NavigationStatus.AsShortString(),
+		Navigation:       in.NavigationId.AsShortString(),
 		Destination:      in.Destination,
-		ETA:              in.ETA,
-				//Vendor:           &in.Vendor,
+		Altitude:         in.Altitude,
+		Style:            in.Style,
+		Metadata: &Metadata{
+			Fleet:        in.Fleet,
+			HomePort:     in.HomePort,
+			HomePosition: in.HomePosition,
+			Organisation: in.Organisation,
+		},
 	}
-
 }

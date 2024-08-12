@@ -1,19 +1,19 @@
 package models
 
-type AisClassId uint8
+type AisClass uint8
 
 const (
-	AisClassUnknown AisClassId = 0
-	AisClassA       AisClassId = 1
-	AisClassB       AisClassId = 2
-	AisAtoN         AisClassId = 3
-	AisStation      AisClassId = 4
-	AisAircraft     AisClassId = 5
+	AisClassUnknown AisClass = 0
+	AisClassA       AisClass = 1
+	AisClassB       AisClass = 2
+	AisAtoN         AisClass = 3
+	AisStation      AisClass = 4
+	AisAircraft     AisClass = 5
 )
 
-func (s AisClassId) AsString() string {
+func (s AisClass) AsString() string {
 
-	switch AisClassId(s) {
+	switch AisClass(s) {
 	case AisClassA:
 		return "A"
 	case AisClassB:
@@ -30,7 +30,7 @@ func (s AisClassId) AsString() string {
 
 }
 
-func AisClassIdFromString(in string) AisClassId {
+func AisClassIdFromString(in string) AisClass {
 
 	switch in {
 	case "A":

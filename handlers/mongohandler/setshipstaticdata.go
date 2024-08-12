@@ -48,26 +48,37 @@ func (p *MongoHandler) setShipStaticData(message models.Message) {
 	if packet.MaximumStaticDraught > 0 {
 		updates["draught"] = models.Metres(packet.MaximumStaticDraught)
 	}
-	var dest *models.Destination
+	// TODO
+	// var dest *models.Destination
+	// if len(packet.Destination) > 0 {
+	// 	dest = &models.Destination{Destination: strings.TrimSpace(packet.Destination)}
+	// }
+	// if packet.Eta.Day > 0 &&
+	// 	packet.Eta.Month > 0 {
+	// 	if dest == nil {
+	// 		dest = &models.Destination{}
+	// 	}
+	// 	eta := models.ETA{
+	// 		Month:  packet.Eta.Month,
+	// 		Day:    packet.Eta.Day,
+	// 		Hour:   packet.Eta.Hour,
+	// 		Minute: packet.Eta.Minute,
+	// 	}
+	// 	dest.ETA = *eta.AsTime()
+	// }
+	// if dest != nil {
+	// 	dest.Time = time.Unix(message.TagBlock.Time, 0)
+	// 	updates["dest"] = dest
+	// }
 	if len(packet.Destination) > 0 {
-		dest = &models.Destination{Destination: strings.TrimSpace(packet.Destination)}
-	}
-	if packet.Eta.Day > 0 &&
-		packet.Eta.Month > 0 {
-		if dest == nil {
-			dest = &models.Destination{}
-		}
+		updates["dest"] = strings.TrimSpace(packet.Destination)
 		eta := models.ETA{
 			Month:  packet.Eta.Month,
 			Day:    packet.Eta.Day,
 			Hour:   packet.Eta.Hour,
 			Minute: packet.Eta.Minute,
 		}
-		dest.ETA = *eta.AsTime()
-	}
-	if dest != nil {
-		dest.Time = time.Unix(message.TagBlock.Time, 0)
-		updates["dest"] = dest
+		updates["eta"] = *eta.AsTime()
 	}
 	updates["source"] = message.TagBlock.Source
 	updates["class"] = models.AisClassA

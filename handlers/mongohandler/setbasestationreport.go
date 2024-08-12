@@ -31,7 +31,7 @@ func (p *MongoHandler) setBaseStationReport(message models.Message) {
 		updates["pos"] = pos
 		updates["state"] = pos.AsState()
 	}
-	updates["class"] = models.AisBaseStation
+	updates["class"] = models.AisStation
 	updates["source"] = message.TagBlock.Source
 
 	p.Upsert(packet.UserID, stationsCollection, updates)

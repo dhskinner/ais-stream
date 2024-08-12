@@ -1,12 +1,5 @@
 package models
 
-//	"style": {
-//	  "iconColor": "red",
-//	  "trackColor": "red",
-//	  "fleetColor": "gold",
-//	  "orgColor": "gold",
-//	  "zIndex": 150
-//	}
 type Style struct {
 	VesselColor string `bson:"vesselcolor,omitempty"`
 	FleetColor  string `bson:"fleetcolor,omitempty"`

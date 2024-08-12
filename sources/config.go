@@ -45,6 +45,7 @@ type Config struct {
 	TimeoutSecsKey string
 	RetrySecsKey   string
 	Boundary       *BoundaryConfig
+	Verbose        bool
 }
 
 func (c *Config) GetAddress() (string, error) {

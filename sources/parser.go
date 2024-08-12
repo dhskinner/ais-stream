@@ -36,6 +36,7 @@ type Parser struct {
 	codec        *aisnmea.NMEACodec
 	messageCount uint64
 	errorCount   uint64
+	verbose      bool
 }
 
 func NewParser(hd interfaces.Handler, name string) *Parser {
@@ -53,6 +54,11 @@ func NewParser(hd interfaces.Handler, name string) *Parser {
 	}
 
 	return p
+}
+
+// flag to set verbose mode
+func (p *Parser) SetVerbose(verbose bool) {
+	p.verbose = verbose
 }
 
 // Accepts and copies bytes from an input source into a buffer for processing
@@ -244,6 +250,9 @@ func (p *Parser) decode(sentence *models.Sentence) error {
 			"count", fmt.Sprintf("%d of %d", p.errorCount, p.messageCount))
 	} else if message != nil {
 
+		if p.verbose {
+			slog.Debug("parser", "name", p.name, "tags", message.TagBlock)
+		}
 		p.handler.Message(models.Message(message))
 
 	}

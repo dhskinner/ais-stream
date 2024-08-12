@@ -6,12 +6,17 @@ import (
 	"ais-stream/sources/aisstream/encode"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/aisstream/ais-message-models/golang/aisStream"
 	"github.com/gorilla/websocket"
+)
+
+const (
+	STATS_INTERVAL time.Duration = 1 * time.Minute
 )
 
 var messageTypes []aisStream.AisMessageTypes = []aisStream.AisMessageTypes{
@@ -29,9 +34,12 @@ var messageTypes []aisStream.AisMessageTypes = []aisStream.AisMessageTypes{
 const timeLayout = "2006-01-02 15:04:05.000000000 -0700 UTC"
 
 type aisClient struct {
-	ctx     context.Context
-	config  *sources.Config
-	handler interfaces.Handler
+	ctx          context.Context
+	config       *sources.Config
+	handler      interfaces.Handler
+	messageCount uint64
+	lastCount    uint64
+	lastStats    time.Time
 }
 
 func Client(ctx context.Context, wg *sync.WaitGroup, config *sources.Config, hd interfaces.Handler) {
@@ -47,7 +55,7 @@ func Client(ctx context.Context, wg *sync.WaitGroup, config *sources.Config, hd 
 	}
 
 	// service the message stream (blocking)
-	c := &aisClient{ctx: ctx, config: config, handler: hd}
+	c := &aisClient{ctx: ctx, config: config, handler: hd, lastStats: time.Now(), messageCount: 0, lastCount: 0}
 	for {
 
 		// run a new worker
@@ -142,6 +150,13 @@ worker:
 			}
 		}
 
+		// print some stats as needed
+		c.messageCount++
+		if time.Now().After(c.lastStats.Add(STATS_INTERVAL)) {
+			c.PrintStats()
+		}
+
+		// process each message
 		switch packet.MessageType {
 
 		// Type 1,2,3
@@ -222,4 +237,14 @@ worker:
 
 	slog.Info("aisstream: stopping worker", "name", c.config.Name)
 	return nil
+}
+
+// print some statistics
+func (p *aisClient) PrintStats() {
+	count := p.messageCount - p.lastCount
+	durn := time.Since(p.lastStats)
+	freq := fmt.Sprintf("%.1f", float32(count)/float32(durn.Seconds()))
+	p.lastCount = p.messageCount
+	p.lastStats = time.Now()
+	slog.Info("client", "name", p.config.Name, "messages", p.messageCount, "rate/sec", freq)
 }

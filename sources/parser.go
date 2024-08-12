@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	PARSER_STATS_INTERVAL time.Duration = 1 * time.Minute
+	STATS_INTERVAL time.Duration = 1 * time.Minute
 )
 
 type State int
@@ -102,7 +102,7 @@ func (p *Parser) Process(ctx context.Context) {
 
 	p.reset()
 
-	ticker := time.NewTicker(PARSER_STATS_INTERVAL)
+	ticker := time.NewTicker(STATS_INTERVAL)
 	defer ticker.Stop()
 
 worker:

@@ -4,6 +4,7 @@ import (
 	"ais-stream/models"
 	"context"
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -86,15 +87,17 @@ func (a *Atlas) runVesselsAggregation(minutes int) error {
 	}
 
 	// pass the pipeline to the Aggregate() method
-	cursor, err := a.localCollections[localVesselsCollectionName].Aggregate(context.TODO(), pipeline)
+	readCtx, readCancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer readCancel()
+	cursor, err := a.localCollections[localVesselsCollectionName].Aggregate(readCtx, pipeline)
 	if err != nil {
 		slog.Error("error running vessels aggregation", "error", err)
 		return err
 	}
 
 	// collate the results
-	var vessels []models.VesselInfo
-	if err = cursor.All(context.TODO(), &vessels); err != nil {
+	var vessels []*models.VesselInfo
+	if err = cursor.All(readCtx, &vessels); err != nil {
 		slog.Error("error collating vessel aggregation results", "error", err)
 		return err
 	}
@@ -106,11 +109,13 @@ func (a *Atlas) runVesselsAggregation(minutes int) error {
 			continue
 		}
 		// TODO sort out the aggregation to marshall straight to desired form
-		v := models.NewAtlasVessel(&vessel)
+		v := models.NewAtlasVessel(vessel)
 		filter := bson.D{{Key: "mmsi", Value: vessel.Mmsi}}
 		m = append(m, mongo.NewReplaceOneModel().SetUpsert(true).SetFilter(filter).SetReplacement(v))
 	}
-	results, err := a.atlasCollections[atlasVesselsCollectionName].BulkWrite(context.TODO(), m)
+	writeCtx, writeCancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer writeCancel()
+	results, err := a.atlasCollections[atlasVesselsCollectionName].BulkWrite(writeCtx, m)
 	if err != nil {
 		slog.Error("error bulk writing vessels to atlas", "error", err, "results", results)
 		return err

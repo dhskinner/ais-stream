@@ -4,7 +4,7 @@ type NavigationId uint8
 
 const (
 	NavigationUnderway             NavigationId = 0
-	Navigationanchor               NavigationId = 1
+	NavigationAnchor               NavigationId = 1
 	NavigationNUC                  NavigationId = 2
 	NavigationRAM                  NavigationId = 3
 	NavigationConstrainedByDraught NavigationId = 4
@@ -33,19 +33,19 @@ var navigationLabelShort []string = []string{
 	"Underway",
 	"Anchored",
 	"Not under command",
-	"RAM",
+	"Restricted manoeuvring",
 	"Draught constrained",
 	"Moored",
 	"Aground",
 	"Fishing",
 	"Sailing",
-	"Reserved",
-	"Reserved",
+	"Reserved (HSC)",
+	"Reserved (DG)",
 	"Towing",
 	"Pushing",
 	"Reserved",
 	"SART, MOB, EPIRB",
-	"Undefined",
+	"Unknown",
 }
 
 var navigationLabelLong []string = []string{

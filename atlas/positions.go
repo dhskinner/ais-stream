@@ -4,6 +4,7 @@ import (
 	"ais-stream/models"
 	"context"
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -143,7 +144,9 @@ func (a *Atlas) runPositionsAggregation(minutes int, minimumSog float32) error {
 	}
 
 	// pass the pipeline to the Aggregate() method
-	cursor, err := a.localCollections[localVesselsCollectionName].Aggregate(context.TODO(), pipeline)
+	readCtx, readCancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer readCancel()
+	cursor, err := a.localCollections[localVesselsCollectionName].Aggregate(readCtx, pipeline)
 	if err != nil {
 		slog.Error("error running positions aggregation", "error", err)
 		return err
@@ -151,7 +154,7 @@ func (a *Atlas) runPositionsAggregation(minutes int, minimumSog float32) error {
 
 	// collate the results
 	var positions []models.AtlasPosition
-	if err = cursor.All(context.TODO(), &positions); err != nil {
+	if err = cursor.All(readCtx, &positions); err != nil {
 		slog.Error("error collating positions aggregation results", "error", err)
 		return err
 	}
@@ -165,7 +168,9 @@ func (a *Atlas) runPositionsAggregation(minutes int, minimumSog float32) error {
 		filter := bson.D{{Key: "mmsi", Value: position.Mmsi}, {Key: "min", Value: position.Min}}
 		m = append(m, mongo.NewReplaceOneModel().SetUpsert(true).SetFilter(filter).SetReplacement(position))
 	}
-	results, err := a.atlasCollections[atlasPositionsCollectionName].BulkWrite(context.TODO(), m)
+	writeCtx, writeCancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer writeCancel()
+	results, err := a.atlasCollections[atlasPositionsCollectionName].BulkWrite(writeCtx, m)
 	if err != nil {
 		slog.Error("error bulk writing positions to atlas", "error", err, "results", results)
 		return err

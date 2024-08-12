@@ -103,11 +103,14 @@ func (a *Atlas) Connect() error {
 
 func (a *Atlas) Disconnect() error {
 
-	if err := a.atlasClient.Disconnect(context.TODO()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := a.atlasClient.Disconnect(ctx); err != nil {
 		return err
 	}
 
-	if err := a.localClient.Disconnect(context.TODO()); err != nil {
+	if err := a.localClient.Disconnect(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -162,11 +165,11 @@ func newClient(connectionString string) (*mongo.Client, error) {
 
 	// Send a ping to confirm a successful connection
 	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Err(); err != nil {
-		slog.Error("error could not ping mongodb atlas", "error", err)
+		slog.Error("error could not ping mongodb server", "connection", connectionString, "error", err)
 		return nil, err
 	}
 
-	slog.Info("successfully connected to mongodb atlas")
+	slog.Info("successfully connected to mongodb", "connection", connectionString)
 	return client, nil
 
 }

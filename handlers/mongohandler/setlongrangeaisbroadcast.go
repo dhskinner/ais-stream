@@ -41,7 +41,7 @@ func (p *MongoHandler) setLongRangeAisBroadcastMessage(message models.Message) {
 		updates["pos"] = pos
 		updates["state"] = pos.AsState()
 	}
-	if packet.Cog >= 0 && packet.Cog < 360 {
+	if packet.Cog < 360 {
 		updates["cog"] = packet.Cog
 	} else {
 		updates["cog"] = 0

@@ -8,9 +8,8 @@ package models
 //	  "zIndex": 150
 //	}
 type Style struct {
-	IconColor  string
-	TrackColor string
-	FleetColor string
-	OrgColor   string
-	ZIndex     uint8
+	VesselColor string `bson:"vesselcolor,omitempty"`
+	FleetColor  string `bson:"fleetcolor,omitempty"`
+	OrgColor    string `bson:"orgcolor,omitempty"`
+	ZIndex      uint8  `bson:"zindex,omitempty"`
 }

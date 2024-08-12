@@ -52,6 +52,7 @@ func (p *MongoHandler) setStandardClassBPositionReport(message models.Message) {
 		updates["sog"] = 0
 	}
 	updates["source"] = message.TagBlock.Source
+	updates["class"] = models.AisClassB
 	p.Upsert(packet.UserID, vesselsCollection, updates)
 
 }

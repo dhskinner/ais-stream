@@ -68,9 +68,11 @@ func (p *MongoHandler) Connect(filterName string) error {
 	}
 
 	var err error = nil
-	p.client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	p.client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		slog.Error("error connecting to mongodb", "error", err)
+		slog.Error("error connecting to mongodb", "uri", uri, "error", err)
 		return err
 	}
 	p.isConnected = true
@@ -123,7 +125,9 @@ func (p *MongoHandler) Disconnect() error {
 
 	p.isConnected = false
 	if p.isConnected {
-		if err := p.client.Disconnect(context.TODO()); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := p.client.Disconnect(ctx); err != nil {
 			return err
 		}
 	}

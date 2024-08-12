@@ -34,14 +34,14 @@ func TestSetFilter(t *testing.T) {
 			//Boundary:    nil,
 			//Mmsis:       []models.MMSI{},
 			MessageIds:  models.StandardMessages,
-			ShipTypeIds: models.SpecialCraft,
+			ShipTypeIds: models.CraftOfInterest,
 		},
 		PositionWhitelist: &WhitelistConfig{
 			Name:     "positions",
 			Boundary: models.BoundaryAustralia,
 			//Mmsis:       []models.MMSI{},
 			MessageIds:  models.StandardMessages,
-			ShipTypeIds: models.SpecialCraft,
+			ShipTypeIds: models.CraftOfInterest,
 		},
 	}
 

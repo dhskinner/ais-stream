@@ -11,6 +11,6 @@ type Handler interface {
 
 type Record struct {
 	Mmsi     models.MMSI        `bson:"mmsi"`
-	ShipType models.ShipTypeId  `bson:"shiptype"`
+	ShipType models.ShipTypeId  `bson:"type"`
 	Position models.Coordinates `bson:"pos"`
 }
